@@ -60,7 +60,7 @@ function generatePDF(qrCodes) {
       // Ajouter le QR code et le texte
       doc.image(url, 10, yPosition, { width: qrCodeSize });
       doc.font('Helvetica-Bold');
-      doc.fontSize(21).text(text, 130, yPosition + 42, { width: 150, align: 'left' });
+      doc.fontSize(33).text(text, 110, yPosition + 36, { width: 150, align: 'left' });
       doc.font('Helvetica');
 
       // Ajouter une ligne en pointillés sous le QR code et le texte
