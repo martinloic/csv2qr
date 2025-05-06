@@ -35,7 +35,7 @@ async function generatePDF(qrData) {
     size: [283.46, 425.2], // Dimensions in points (10 cm x 15 cm)
     margin: 10
   });
-  const pdfFilePath = path.join(__dirname, 'outputnew.pdf'); // Path for the PDF file
+  const pdfFilePath = path.join(__dirname, 'output.pdf'); // Path for the PDF file
   const writeStream = fs.createWriteStream(pdfFilePath);
   doc.pipe(writeStream);
 
