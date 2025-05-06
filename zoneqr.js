@@ -4,17 +4,17 @@ const QRCode = require('qrcode');
 const PDFDocument = require('pdfkit');
 const path = require('path');
 
-// Lire le fichier CSV
-const csvFilePath = 'data.csv'; // Chemin vers votre fichier CSV
+// Read the CSV file
+const csvFilePath = 'data.csv'; // Path to your CSV file
 const qrData = [];
 
 fs.createReadStream(csvFilePath)
-  .pipe(csv({ separator: ';' })) // Utiliser le séparateur ';' pour le CSV
+  .pipe(csv({ separator: ';' })) // Use ';' as the separator for the CSV
   .on('data', (row) => {
     if (row.code && typeof row.code === 'string' && row.zone && typeof row.zone === 'string') {
       qrData.push({ code: row.code, zone: row.zone });
     } else {
-      console.warn('Ligne CSV invalide ou colonne manquante:', row);
+      console.warn('Invalid CSV row or missing column:', row);
     }
   })
   .on('end', async () => {
@@ -22,20 +22,20 @@ fs.createReadStream(csvFilePath)
       try {
         await generatePDF(qrData);
       } catch (error) {
-        console.error('Erreur lors de la génération du PDF:', error);
+        console.error('Error generating PDF:', error);
       }
     } else {
-      console.error('Aucune donnée valide trouvée dans le fichier CSV.');
+      console.error('No valid data found in the CSV file.');
     }
   });
 
-// Générer un PDF avec les QR codes
+// Generate a PDF with QR codes
 async function generatePDF(qrData) {
   const doc = new PDFDocument({
-    size: [283.46, 425.2], // Dimensions en points (10 cm x 15 cm)
+    size: [283.46, 425.2], // Dimensions in points (10 cm x 15 cm)
     margin: 10
   });
-  const pdfFilePath = path.join(__dirname, 'outputnew.pdf'); // Chemin du fichier PDF à la racine
+  const pdfFilePath = path.join(__dirname, 'outputnew.pdf'); // Path for the PDF file
   const writeStream = fs.createWriteStream(pdfFilePath);
   doc.pipe(writeStream);
 
@@ -47,43 +47,43 @@ async function generatePDF(qrData) {
     const { code, zone } = qrData[index];
     const url = await QRCode.toDataURL(code);
 
-    // Vérifier si on doit ajouter une nouvelle page
+    // Check if a new page should be added
     if (index > 0 && index % maxQRPerPage === 0) {
       doc.addPage({
-        size: [283.46, 425.2], // Dimensions en points (10 cm x 15 cm)
+        size: [283.46, 425.2], // Dimensions in points (10 cm x 15 cm)
         margin: 10
       });
       yPosition = 10;
     }
 
     doc.moveTo(10, yPosition)
-    .lineTo(273.46, yPosition)
-    .dash(5, { space: 8 })
-    .stroke();
+       .lineTo(273.46, yPosition)
+       .dash(5, { space: 8 })
+       .stroke();
 
-    // Ajouter le QR code et le texte
+    // Add the QR code and text
     doc.image(url, 10, yPosition, { width: qrCodeSize });
     doc.font('Helvetica-Bold');
     doc.fontSize(33).text(code, 110, yPosition + 31, { width: 150, align: 'left' });
     doc.font('Helvetica');
 
-    // Ajouter la zone sous le code
-    doc.fontSize(12).text(`ZONE : ${zone}`, 110, yPosition + 60, { width: 150, align: 'left' });
+    // Add the zone below the code
+    doc.fontSize(12).text(`ZONE: ${zone}`, 110, yPosition + 60, { width: 150, align: 'left' });
 
-    // Ajouter une ligne en pointillés sous le QR code et le texte
+    // Add a dotted line below the QR code and text
     doc.moveTo(10, yPosition + qrCodeSize)
        .lineTo(273.46, yPosition + qrCodeSize)
        .dash(5, { space: 8 })
        .stroke();
 
-    // Mettre à jour la position y pour la ligne suivante
-    yPosition += qrCodeSize; // Ajout de 20 pour inclure la hauteur du texte de la zone
+    // Update the y position for the next line
+    yPosition += qrCodeSize; // Add 20 to include the height of the zone text
   }
 
   doc.end();
   return new Promise((resolve, reject) => {
     writeStream.on('finish', () => {
-      console.log('PDF généré avec succès:', pdfFilePath);
+      console.log('PDF generated successfully:', pdfFilePath);
       resolve();
     });
     writeStream.on('error', reject);
