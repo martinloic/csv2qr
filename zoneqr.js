@@ -64,7 +64,7 @@ async function generatePDF(qrData) {
     // Add the QR code and text
     doc.image(url, 10, yPosition, { width: qrCodeSize });
     doc.font('Helvetica-Bold');
-    doc.fontSize(33).text(code, 110, yPosition + 31, { width: 150, align: 'left' });
+    doc.fontSize(33).text(`${code}`, 110, yPosition + 31, { width: 150, align: 'left' });
     doc.font('Helvetica');
 
     // Add the zone below the code
